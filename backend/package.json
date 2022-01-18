@@ -1,4 +1,16 @@
 {
   "name": "backend",
-  "packageManager": "yarn@3.1.1"
+  "scripts": {
+    "crypto": "node ./services/index.js",
+    "test": "jest"
+  },
+  "packageManager": "yarn@3.1.1",
+  "dependencies": {
+    "eth-crypto": "^2.1.0",
+    "ntru": "^3.2.2",
+    "text-encoding": "^0.7.0"
+  },
+  "devDependencies": {
+    "jest": "^27.4.7"
+  }
 }
