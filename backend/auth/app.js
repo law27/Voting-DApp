@@ -1,103 +1,47 @@
-require("dotenv").config();
-require("./config/database").connect();
-const express = require("express");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+var express = require('express');
+var path = require('path');
+var {MongoClient} = require('mongodb');
+var bodyParser = require('body-parser');
+var crypto = require('crypto');
 
-const app = express();
-app.use(express.json());
+var app = express();
+var new_db = "mongodb+srv://law27:Lawrance27$@cluster0.4lu1u.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+var mongo = new MongoClient(new_db);
+													
+app.get('/',function(req,res){
+	res.set({
+		'Access-Control-Allow-Origin' : '*'
+	});
+	return res.redirect('/public/index.html');
+}).listen(8080);
 
-//importing user context
-const User = require("./model/user");
+console.log("Server listening at : 8080");
+app.use('/public', express.static(__dirname + '/public'));
+app.use( bodyParser.json() );
+app.use(bodyParser.urlencoded({ // to support URL-encoded bodies
+	extended: true
+}));
 
-//Register
-app.post("/register", async(req, res) => {
-     try {
-    // Get user input
-       const { first_name,email, password } = req.body;
+app.post('/signUp' ,function(req,res){
+	var name = req.body.name;
+	var aadhar= req.body.email;
+	var password = req.body.password;
+					
+    var data = {
+		"name":name,
+		"password": password, 
+	}
 
-    // Validate user input
-    if (!(email && password && first_name)) {
-      res.status(400).send("All input is required");
-    }
-
-    // check if user already exist
-    // Validate if user exist in our database
-    const oldUser = await User.findOne({ email });
-
-    if (oldUser) {
-      return res.status(409).send("User Already Exist. Please Login");
-    }
-
-    //Encrypt user password
-    const encryptedPassword = await bcrypt.hash(password, 10);
-
-    // Create user in our database
-    const user = await User.create({
-      first_name,
-      email: email.toLowerCase(), // sanitize: convert email to lowercase
-      password: encryptedPassword,
-    });
-
-    // Create token
-    const token = jwt.sign(
-      { user_id: user._id, email },
-      process.env.TOKEN_KEY,
-      {
-        expiresIn: "2h",
-      }
-    );
-    // save user token
-    user.token = token;
-
-    // return new user
-    return res.status(201).json(user);
-  } catch (err) {
-    console.log(err);
-  }
-  
+mongo.connect(function(error , db){
+		if (error){
+			throw error;
+		}
+		console.log("connected to database successfully");
+		//CREATING A COLLECTION IN MONGODB USING NODE.JS
+        const database = mongo.db('UserRegistration');
+        const details = database.collection('details');
+		details.insertOne(data);
 });
-
-
-//Login
-app.post("/login", async(req, res) => {
-
-    // Our login logic starts here
-  try {
-    // Get user input
-    const { email, password } = req.body;
-
-    // Validate user input
-    if (!(email && password)) {
-      res.status(400).send("All input is required");
-    }
-    // Validate if user exist in our database
-    const user = await User.findOne({ email });
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      // Create token
-      const token = jwt.sign(
-        { user_id: user._id, email },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "2h",
-        }
-      );
-
-      // save user token
-      user.token = token;
-
-      // user
-      res.status(200).json(user);
-    }
-    else{
-    res.status(400).send("Invalid Credentials");
-    }
-  } catch (err) {
-    console.log(err);
-  }
-  
-  //logic ends here
+	
+	
 });
-
-module.exports = app;

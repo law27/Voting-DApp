@@ -6,7 +6,10 @@
   },
   "packageManager": "yarn@3.1.1",
   "dependencies": {
+    "body-parser": "^1.20.0",
     "eth-crypto": "^2.1.0",
+    "express": "^4.17.3",
+    "mongodb": "^4.4.1",
     "ntru": "^3.2.2",
     "text-encoding": "^0.7.0"
   },
