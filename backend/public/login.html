@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Voting System</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <style>
+    </style>
+  </head>
+  <body>
+    <h1>Voting System</h1>
+    <form id="form">
+      <label for="input">Username</label>
+      <input id="input" autocomplete="off" /><br>
+      <label for="password">Password</label>
+      <input id="password" autocomplete="off" /><br>
+      <button id="submit">Send</button>
+    </form>
+  </body>
+  <script>
+      document.getElementById("submit").addEventListener("click", async event => {
+        event.preventDefault();
+        const id = document.getElementById("input").value;
+        const password = document.getElementById("password").value;
+        const body = JSON.stringify( { id, password } );
+        const rawData = await fetch("/authenticate", {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'          
+          },
+          redirect: 'follow',
+          body 
+        });
+        const values = await rawData.json();
+        Cookies.set('pub', values.publicKey);
+        window.location = values.url;
+      });
+
+      /*
+        let socket = io();
+        const data = {
+            key: "LAWRANCE",
+            msg: "498654865yu64549545"
+        }
+        socket.emit('message', data);
+      */
+  </script>
+</html>

@@ -1,11 +1,7 @@
-const ntru = require("ntru");
 const ecc = require('eth-crypto');
 const textEncoding = require("text-encoding");
-
-async function generateNTRUKeyPairs() {
-    const { privateKey, publicKey } = await ntru.keyPair();
-    return { privateKey, publicKey };
-}
+const rsa = require("node-forge").pki.rsa;
+const forge = require("node-forge");
 
 async function generateECCKeyPairs() {
     const identity = await ecc.createIdentity();
@@ -22,29 +18,32 @@ async function eccDecryption( data, privateKey ) {
     return decryptedData;
 }
 
-async function ntruEncryption( data, publicKey ) {
-    const textEncoder = textEncoding.TextEncoder;
-    const uint8DataArray = new textEncoder().encode(data);
-    const encryptedData = await ntru.encrypt(uint8DataArray, publicKey);
-    return encryptedData;
+async function generateRSAKeyPairs() {
+    const keyPair = rsa.generateKeyPair({bits: 1024});
+    const publicKey = forge.pki.publicKeyToPem(keyPair.publicKey);
+    const privateKey = forge.pki.privateKeyToPem(keyPair.privateKey);
+    return {publicKey, privateKey};
 }
 
-async function ntruDecryption( data, privateKey ) {
-    const textDecoder = textEncoding.TextDecoder;
-    const decryptedData = await ntru.decrypt(data, privateKey);
-    const uintData = [];
-    for(let i = 0; i < decryptedData.length; i++) {
-        uintData.push(decryptedData[i]);
-    }
-    const plainData = new textDecoder().decode(new Uint8Array(uintData));
-    return plainData;
+
+
+async function rsaEncryption(data, publicKey) {
+    const rsaPublicKey = forge.pki.publicKeyFromPem(publicKey);
+    return await rsaPublicKey.encrypt(data);
 }
+
+async function rsaDecryption(data, privateKey) {
+    const rsaPrivateKey = forge.pki.privateKeyFromPem(privateKey);
+    return await rsaPrivateKey.decrypt(data);
+}
+
+
 
 module.exports = {
     generateECCKeyPairs,
-    generateNTRUKeyPairs,
+    generateRSAKeyPairs,
     eccEncryption,
     eccDecryption,
-    ntruEncryption,
-    ntruDecryption,
+    rsaEncryption,
+    rsaDecryption
 }

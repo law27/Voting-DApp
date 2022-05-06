@@ -1,0 +1,18 @@
+{
+    "one": {
+        "_id": {
+          "$oid": "627128d75809be0f03c3d20g"
+        },
+        "name": "Kailas",
+        "password": "123456",
+        "age": 21
+      },
+    "two": {
+        "_id": {
+          "$oid": "627128d75809be0f03c3d20h"
+        },
+        "name": "Karthick",
+        "password": "123456",
+        "age": 21
+      }
+}
