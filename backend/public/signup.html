@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up for Voting</title>
+</head>
+<body>
+    <h1>Sign up for Voting</h1>
+    <br>
+    <br>
+    <br>
+    <form id="form">
+      <label for="aadharId">Aadhar ID</label>
+      <input id="aadharId" autocomplete="off" /><br>
+      <label for="password">Password</label>
+      <input id="password" autocomplete="off" /><br>
+      <label for="name">Name</label>
+      <input id="name" autocomplete="off" /><br>
+      <label for="age">Age</label>
+      <input type="number" id="age" autocomplete="off" /><br>
+      <label for="address">Address</label>
+      <input id="address" autocomplete="off" /><br>
+      <label for="constitution">Constitution</label>
+      <input id="constitution" autocomplete="off" /><br>
+      <button id="submit">Send</button>
+    </form>
+</body>
+<script>
+    async function signUp(event) {
+        event.preventDefault();
+        const fields = ["aadharId", "password", "name", "age", "address", "constitution"];
+        const postData = {};
+        for(let i = 0; i < fields.length; ++i) {
+            postData[fields[i]] = document.getElementById(fields[i]).value;
+        }
+        const body = JSON.stringify(postData);
+        const rawData = await fetch("/signup", {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'          
+          },
+          redirect: 'follow',
+          body 
+        });
+        console.log(rawData);
+    }
+
+    document.getElementById("submit").addEventListener("click", signUp);
+</script>
+</html>

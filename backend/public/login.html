@@ -9,8 +9,8 @@
   <body>
     <h1>Voting System</h1>
     <form id="form">
-      <label for="input">Username</label>
-      <input id="input" autocomplete="off" /><br>
+      <label for="aadharId">Aadhar ID</label>
+      <input id="aadharId" autocomplete="off" /><br>
       <label for="password">Password</label>
       <input id="password" autocomplete="off" /><br>
       <button id="submit">Send</button>
@@ -19,9 +19,9 @@
   <script>
       document.getElementById("submit").addEventListener("click", async event => {
         event.preventDefault();
-        const id = document.getElementById("input").value;
+        const aadharId = document.getElementById("aadharId").value;
         const password = document.getElementById("password").value;
-        const body = JSON.stringify( { id, password } );
+        const body = JSON.stringify( { aadharId, password } );
         const rawData = await fetch("/authenticate", {
           method: 'POST',
           headers: {
@@ -32,17 +32,11 @@
           body 
         });
         const values = await rawData.json();
-        Cookies.set('pub', values.publicKey);
+        if(values.publicKey) {
+          Cookies.set('pub', values.publicKey);
+        }
         window.location = values.url;
       });
 
-      /*
-        let socket = io();
-        const data = {
-            key: "LAWRANCE",
-            msg: "498654865yu64549545"
-        }
-        socket.emit('message', data);
-      */
   </script>
 </html>

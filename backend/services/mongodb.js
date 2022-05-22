@@ -8,13 +8,45 @@ function getCollectionsObject( dbObject, collectionName ) {
     return dbObject.collection(collectionName);
 }
 
-async function getUserWithUserName( userName ) {
+async function getCandidateListForConstiuition( constitution ) {
+    const client = await mongoClient;
+    const dbObject = getDBObject(client, "Voting-DApp");
+    const collectionObject = getCollectionsObject(dbObject, "Candidates");
+    return (await collectionObject.find({ constitution }).toArray())[0];
+}
+
+async function getUserFromId( id ) {
     const client = await mongoClient;
     const dbObject = getDBObject(client, "Voting-DApp");
     const collectionObject = getCollectionsObject(dbObject, "Users");
-    return await collectionObject.find({name: userName}).toArray();
+    return await collectionObject.find({ id } ).toArray();
+}
+
+async function createNewUser( data ) {
+    const client = await mongoClient;
+    const dbObject = getDBObject(client, "Voting-DApp");
+    const collectionObject = getCollectionsObject(dbObject, "Users");
+    return await collectionObject.insertOne(data);
+}
+
+async function createNewPKI( data ) {
+    const client = await mongoClient;
+    const dbObject = getDBObject(client, "Voting-DApp");
+    const collectionObject = getCollectionsObject(dbObject, "PKI");
+    return await collectionObject.insertOne(data);
+}
+
+async function getKeyFromPKI( id ) {
+    const client = await mongoClient;
+    const dbObject = getDBObject(client, "Voting-DApp");
+    const collectionObject = getCollectionsObject(dbObject, "PKI");
+    return await collectionObject.find({ id } ).toArray();
 }
 
 module.exports = {
-    getUserWithUserName
+    getCandidateListForConstiuition,
+    getUserFromId,
+    createNewUser,
+    createNewPKI,
+    getKeyFromPKI
 }

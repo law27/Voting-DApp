@@ -2,6 +2,7 @@ const ecc = require('eth-crypto');
 const textEncoding = require("text-encoding");
 const rsa = require("node-forge").pki.rsa;
 const forge = require("node-forge");
+const jsencrypt = require("node-jsencrypt")
 
 async function generateECCKeyPairs() {
     const identity = await ecc.createIdentity();
@@ -10,11 +11,12 @@ async function generateECCKeyPairs() {
 
 async function eccEncryption( data, publicKey ) {
     const encryptedData = await ecc.encryptWithPublicKey(publicKey, data);
-    return encryptedData;
+    return ecc.cipher.stringify(encryptedData);
 }
 
 async function eccDecryption( data, privateKey ) {
-    const decryptedData = await ecc.decryptWithPrivateKey(privateKey, data);
+    const parsedData = ecc.cipher.parse(data);
+    const decryptedData = await ecc.decryptWithPrivateKey(privateKey, parsedData);
     return decryptedData;
 }
 
@@ -27,14 +29,18 @@ async function generateRSAKeyPairs() {
 
 
 
-async function rsaEncryption(data, publicKey) {
+function rsaEncryption(data, publicKey) {
     const rsaPublicKey = forge.pki.publicKeyFromPem(publicKey);
-    return await rsaPublicKey.encrypt(data);
+    const encrypt = new jsencrypt();
+    encrypt.setPublicKey(publicKey);
+    return encrypt.encrypt(data);
 }
 
-async function rsaDecryption(data, privateKey) {
+function rsaDecryption(data, privateKey) {
     const rsaPrivateKey = forge.pki.privateKeyFromPem(privateKey);
-    return await rsaPrivateKey.decrypt(data);
+    const decrypt = new jsencrypt();
+    decrypt.setPrivateKey(privateKey);
+    return decrypt.decrypt(data.toString());
 }
 
 

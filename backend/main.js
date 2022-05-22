@@ -10,7 +10,11 @@ const bodyParser = require("body-parser");
 const { generateRSAKeyPairs, rsaDecryption } = require("./services/crypto");
 const cookieParser = require("cookie-parser");
 const cookie = require("cookie");
-const { loginProcess } = require("./middlewares/auth");
+const { loginProcess, signUpProcess, processSignUp } = require("./middlewares/auth");
+const { sessionStore } = require("./services/redis");
+const { getCandidates } = require("./middlewares/socket/candidate");
+const { proccessAndStoreInBlockChain } = require("./middlewares/voting");
+require("dotenv").config()
 
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -21,18 +25,26 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/login.html');
 })
 
-app.post('/authenticate', loginProcess, (req, res) => {
-    res.redirect(301, '/redirect');
-});
-
-app.get('/redirect', async (req, res) => {
+app.post('/authenticate', loginProcess, async (req, res) => {
     const keyPair = await generateRSAKeyPairs();
     const publicKey = keyPair.publicKey;
+    const privateKey = keyPair.privateKey;
+    sessionStore[req.user.id] = {
+        publicKey, privateKey
+     } // TODO: Store this is in redis session
+    sessionStore[publicKey] = req.user.id;
     res.status(200).json({
         publicKey,
         url: '/vote'
     });
+});
+
+app.get('/signup', (_req, res) => {
+    res.sendFile(__dirname + '/public/signup.html');
 })
+
+app.post('/signup', signUpProcess, processSignUp);
+
 
 app.get('/vote', async (req, res) => {
     res.sendFile(__dirname + '/public/vote.html');
@@ -41,9 +53,19 @@ app.get('/vote', async (req, res) => {
 
 // Socket Connection
 io.on('connection', socket => {
-    const publicKey = cookie.parse(socket.handshake.headers.cookie).pub;
-    socket.on('message', console.log);
-    socket.on('voterList', console.log);
+    socket.on('init', async req => {
+        if(socket.handshake.auth.token === req.token) {
+            const candidates = await getCandidates(sessionStore[req.token]);
+            socket.emit('candidateList', candidates.candidates);
+        }
+    });
+    socket.on('voteData', req => {
+        const userId = sessionStore[req.token];
+        if(userId && sessionStore[userId].publicKey === req.token) {
+            const decryptedDada = rsaDecryption(req.voteData, sessionStore[sessionStore[req.token]].privateKey);
+            proccessAndStoreInBlockChain(userId, decryptedDada);
+        }
+    })
 })
 
 
@@ -51,6 +73,3 @@ io.on('connection', socket => {
 server.listen(3000, () => {
     console.log("Listening to port 3000");
 });
-
-
-// TODO: a lot to do

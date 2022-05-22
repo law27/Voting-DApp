@@ -10,13 +10,57 @@
     <title>Voting</title>
 </head>
 <body>
-    <h1 id="cookie"></h1>
+    <div>
+        <ol id="view"></ol>
+    </div>
 </body>
     <script>
-        (function(){
-            const cookie = Cookies.get("pub");
-            document.getElementById("cookie").innerText = cookie; 
-        })();
-        const socket = io()
+        
+
+        function processVote(event) {
+            event.stopPropagation();
+            const publicKey = Cookies.get("pub");
+            const encrypt = new JSEncrypt();
+            encrypt.setPublicKey(publicKey);
+            const encryptedMessage = encrypt.encrypt(event.target.id);
+            socket.emit("voteData", {
+                token,
+                voteData: encryptedMessage
+            })
+        }
+
+        function candidateComponent( candidateDetail ) {
+            const li = document.createElement("li");
+            const h1 = document.createElement("h1");
+            const h2 = document.createElement("h2");
+            const button = document.createElement("button");
+            h1.textContent = candidateDetail.name;
+            h2.textContent = candidateDetail.party;
+            button.textContent = "vote";
+            button.addEventListener("click", processVote)
+            button.id = candidateDetail.id;
+            li.appendChild(h1);
+            li.appendChild(h2);
+            li.appendChild(button);
+            return li;
+        }
+
+        function candidateListCallback( candidates ) {
+            const view = document.getElementById("view");
+            for(let i = 0; i < candidates.length; ++i) {
+                const component = candidateComponent(candidates[i]);
+                view.appendChild(component);
+            }
+        }
+        const token = Cookies.get("pub");
+        const socket = io({
+            auth: {
+                token
+            }
+        });
+        socket.emit('init', {
+            token
+        });
+        socket.on('candidateList', candidateListCallback);
     </script>
 </html>
