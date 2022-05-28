@@ -54,7 +54,8 @@ async function processSignUp(req, res, next) {
         });
         res.status(200).json({
             statusCode: 200,
-            message: "User created Succesully"
+            message: "User created Succesully",
+            url: '/'
         })
     } catch( err ) {
         res.status(500).json({

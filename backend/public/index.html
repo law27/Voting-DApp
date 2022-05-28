@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        @import url(//fonts.googleapis.com/earlyaccess/nicomoji.css);
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+
+        body {
+            background-color: #363636;
+        }
+
+        #container {
+            text-align: center;
+            margin-top: 15%;
+        }
+
+        #title {
+            color: #11BA45;
+            font-size: 104px;
+            font-family: 'Nico Moji';
+        }
+
+        .auth {
+            color: white;
+            font-family: 'Poppins';
+            font-weight: medium;
+            font-size: 45px;
+        }
+
+        .auth:hover {
+            cursor: pointer;
+        }
+
+        #separator {
+            color: #11BA45;
+            font-size: 50px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1 id="title">DVOTE</h1>
+        <div id="options">
+            <span id="login" class="auth"> Login </span>
+            <span id="separator"> | </span>
+            <span id="signup" class="auth"> Signup </span>
+        </div>
+    </div>
+</body>
+<script>
+
+    function handleClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const path = event.target.id;
+        const baseurl = window.location.origin;
+        const destination = `${baseurl}/${path}`;
+        window.location = destination;
+    }
+
+    const authElements = document.querySelectorAll(".auth");
+    authElements.forEach( element => {
+        element.addEventListener("click", handleClick);
+    })
+</script>
+</html>
