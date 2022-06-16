@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign up for Voting</title>
+  <style>
+        @import url(//fonts.googleapis.com/earlyaccess/nicomoji.css);
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap');
+
+        body {
+            background-color: #363636;
+        }
+        
+        #title {
+            color: #11BA45;
+            font-size: 80px;
+            font-family: 'Nico Moji';
+            margin-top: 100px;
+        }
+
+        #container {
+            margin-top: 100px;
+            display: flex;
+            justify-content: center;
+            height: 550px;
+        }
+
+        #form {
+            font-family: 'Poppins';
+        }
+
+        #form > label, #signup {
+            color:#11BA45;
+            font-size: 20px;
+        }
+
+        #form > input {
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+
+        #separator {
+            height: inherit;
+            width: 5px;
+            background-color: #11BA45;
+        }
+
+        .item {
+            margin-left: 50px;
+            margin-right: 50px;
+        }
+        
+        #signup {
+            color: white;
+            text-align: center;
+        }
+        
+        button {
+            width: 100%;
+            color: #11BA45;
+            margin-top: 30px;
+            font-family: 'Poppins';
+            height: 40px;
+            font-weight: bold;
+            font-size: large;
+            border-radius: 28.5;
+        }
+
+  </style>
+</head>
+<body>
+    <div id="container">
+      <h1 id="title" class="item">DVote</h1>
+      <div id="separator" class="item"></div>
+      <form id="form" class="item">
+        <h3 id="signup">Signup</h3>
+        <label for="aadharId">Aadhar ID</label><br>
+        <input id="aadharId" autocomplete="off" /><br>
+        <label for="password">Password</label><br>
+        <input id="password" autocomplete="off" /><br>
+        <label for="name">Name</label><br>
+        <input id="name" autocomplete="off" /><br>
+        <label for="age">Age</label><br>
+        <input type="number" id="age" autocomplete="off" /><br>
+        <label for="address">Address</label><br>
+        <input id="address" autocomplete="off" /><br>
+        <label for="constitution">Constitution</label><br>
+        <input id="constitution" autocomplete="off" /><br>
+        <button id="submit">SignUp</button><br>
+      </form>
+    </div>
+</body>
+<script>
+    async function signUp(event) {
+        event.preventDefault();
+        const fields = ["aadharId", "password", "name", "age", "address", "constitution"];
+        const postData = {};
+        for(let i = 0; i < fields.length; ++i) {
+            postData[fields[i]] = document.getElementById(fields[i]).value;
+        }
+        const body = JSON.stringify(postData);
+        const rawData = await fetch("/signup", {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'          
+          },
+          redirect: 'follow',
+          body 
+        });
+        const json = await rawData.json();
+        if(json.url) {
+          window.location = `${window.location.origin}${json.url}` 
+        }
+    }
+
+    document.getElementById("submit").addEventListener("click", signUp);
+</script>
+</html>

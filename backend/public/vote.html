@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/2.3.1/jsencrypt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
+    <title>Voting</title>
+</head>
+<body>
+    <div>
+        <ol id="view"></ol>
+    </div>
+</body>
+    <script>
+        
+
+        function processVote(event) {
+            event.stopPropagation();
+            const publicKey = Cookies.get("pub");
+            const encrypt = new JSEncrypt();
+            encrypt.setPublicKey(publicKey);
+            const encryptedMessage = encrypt.encrypt(event.target.id);
+            socket.emit("voteData", {
+                token,
+                voteData: encryptedMessage
+            })
+        }
+
+        function candidateComponent( candidateDetail ) {
+            const li = document.createElement("li");
+            const h1 = document.createElement("h1");
+            const h2 = document.createElement("h2");
+            const button = document.createElement("button");
+            h1.textContent = candidateDetail.name;
+            h2.textContent = candidateDetail.party;
+            button.textContent = "vote";
+            button.addEventListener("click", processVote)
+            button.id = candidateDetail.id;
+            li.appendChild(h1);
+            li.appendChild(h2);
+            li.appendChild(button);
+            return li;
+        }
+
+        function candidateListCallback( candidates ) {
+            const view = document.getElementById("view");
+            for(let i = 0; i < candidates.length; ++i) {
+                const component = candidateComponent(candidates[i]);
+                view.appendChild(component);
+            }
+        }
+        const token = Cookies.get("pub");
+        const socket = io({
+            auth: {
+                token
+            }
+        });
+        socket.emit('init', {
+            token
+        });
+        socket.on('candidateList', candidateListCallback);
+    </script>
+</html>

@@ -1,4 +1,3 @@
-
 const map = {};
 function addContractAddressToDB(id, contractAddress) {
     map[id] = contractAddress;
